@@ -61,7 +61,12 @@ app.use(helmet({
                 "https://cdnjs.cloudflare.com"
             ],
             imgSrc: ["'self'", "data:", "https:"],
-            connectSrc: ["'self'", "http://localhost:3001", "http://localhost:8080"]
+            connectSrc: [
+                "'self'", 
+                "http://localhost:3001", 
+                "http://localhost:8080",
+                "https://mood-cave-api.zeabur.app"
+            ]
         }
     }
 }));

@@ -15,7 +15,13 @@ export const AI_CONFIG = {
  * 根據當前環境動態獲取 API URL
  */
 function getApiUrl() {
+    const currentHost = window.location.hostname;
     const currentPort = window.location.port;
+    
+    // 如果是在生產環境（Zeabur 或其他雲端服務）
+    if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+        return '/api/ai/chat';
+    }
     
     // 如果在 3001 端口（Node.js 服務器），使用相對路徑
     if (currentPort === '3001') {
