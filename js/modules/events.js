@@ -26,8 +26,8 @@ async function submitMood() {
         return;
     }
     
-    // 基本內容驗證 (防止純數字或特殊字符)
-    if (/^[\d\s\W]+$/.test(moodText)) {
+    // 基本內容驗證 (確保包含中文字符或英文字母)
+    if (!/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaffa-zA-Z]/.test(moodText)) {
         showNotification('請輸入有意義的文字內容', 'warning');
         return;
     }
