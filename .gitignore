@@ -31,4 +31,15 @@ logs/
 
 # 建置輸出
 dist/
-build/ 
+build/
+
+# 開發工具和過程紀錄
+.specstory/
+.cursor/
+
+# 測試報告
+coverage/
+
+# 更多編輯器設定
+*.sublime-project
+*.sublime-workspace 
