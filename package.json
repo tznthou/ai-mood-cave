@@ -18,17 +18,17 @@
   "author": "TznThou",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "express-rate-limit": "^6.7.0",
     "helmet": "^6.1.5",
-    "dotenv": "^16.0.3",
     "node-fetch": "^3.3.1"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
+    "nodemon": "^3.1.10"
   },
   "engines": {
     "node": ">=14.0.0"
   }
-} 
+}

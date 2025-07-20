@@ -17,7 +17,7 @@ import { AI_CONFIG } from './config.js';
 export async function callDeepBricksAI(userMessage, style = 'warm') {
     try {
         console.log('🤖 開始調用後端 AI API 代理...');
-        console.log('📝 用戶訊息:', userMessage);
+        console.log('📝 用戶訊息長度:', userMessage.length, '字符');
         console.log('🎨 回應風格:', style);
 
         const requestBody = {
@@ -54,21 +54,21 @@ export async function callDeepBricksAI(userMessage, style = 'warm') {
 
         const data = await response.json();
         console.log('✅ 後端響應成功');
-        console.log('📊 響應數據:', data);
+        console.log('📊 響應數據長度:', data.response ? data.response.length : 0, '字符');
         
         if (data.success && data.response) {
-            console.log('🎯 AI 回應內容:', data.response);
+            console.log('🎯 AI 回應已接收');
             return data.response;
         } else if (data.fallback) {
             // 後端指示應該使用備用回應
             console.log('🔄 後端建議使用備用回應');
             throw new Error('AI service unavailable, using fallback');
         } else {
-            console.error('❌ 後端響應格式異常:', data);
+            console.error('❌ 後端響應格式異常');
             throw new Error('Invalid backend response format');
         }
     } catch (error) {
-        console.error('❌ 後端 AI API 調用失敗:', error);
+        console.error('❌ 後端 AI API 調用失敗:', error.message);
         throw error;
     }
 }

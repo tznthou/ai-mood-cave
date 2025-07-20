@@ -14,8 +14,21 @@ async function submitMood() {
     const moodInput = document.getElementById('moodInput');
     const moodText = moodInput.value.trim();
     
+    // 輸入驗證
     if (!moodText) {
         showNotification('請輸入你的心情想法', 'warning');
+        return;
+    }
+    
+    // 長度限制 (防止過長輸入)
+    if (moodText.length > 1000) {
+        showNotification('輸入內容過長，請控制在1000字以內', 'warning');
+        return;
+    }
+    
+    // 基本內容驗證 (防止純數字或特殊字符)
+    if (/^[\d\s\W]+$/.test(moodText)) {
+        showNotification('請輸入有意義的文字內容', 'warning');
         return;
     }
 

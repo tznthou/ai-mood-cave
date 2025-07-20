@@ -126,6 +126,38 @@ app.post('/api/ai/chat', aiLimiter, async (req, res) => {
             });
         }
 
+        // 驗證 style 參數
+        const validStyles = ['warm', 'professional', 'friend', 'mentor', 'meditation'];
+        if (!validStyles.includes(style)) {
+            return res.status(400).json({
+                error: 'Invalid style parameter'
+            });
+        }
+
+        // 驗證每個訊息的格式和長度
+        for (let i = 0; i < messages.length; i++) {
+            const message = messages[i];
+            if (!message.role || !message.content) {
+                return res.status(400).json({
+                    error: `Invalid message format at index ${i}`
+                });
+            }
+            
+            // 限制訊息長度
+            if (message.content.length > 2000) {
+                return res.status(400).json({
+                    error: `Message content too long at index ${i}`
+                });
+            }
+            
+            // 基本內容驗證
+            if (typeof message.content !== 'string' || message.content.trim().length === 0) {
+                return res.status(400).json({
+                    error: `Empty or invalid message content at index ${i}`
+                });
+            }
+        }
+
         // 檢查 API 金鑰
         const apiKey = process.env.DEEPBRICKS_API_KEY;
         if (!apiKey) {
