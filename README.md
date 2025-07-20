@@ -309,19 +309,16 @@ TznThou
 2025-07-12
 
 ## 版本
-2.3.3
+2.3.4
 
 ---
 
 ## 版本變更紀錄
 
-- 0.1.3 (2025-07-20)：修復中文輸入驗證問題
+- 2.3.4 (2025-07-20)：修復中文輸入驗證問題
   - 🐛 修復正則表達式錯誤，正確識別中文字符
   - 🔧 更新輸入驗證邏輯，支援中文、英文、數字混合輸入
   - 📝 詳細記錄錯誤原因和修復過程（見故障排除章節）
-- 0.1.2 (2025-07-20)：修復 API 連線問題 - 更新動態 API URL 檢測和 CSP 設定
-- 0.1.1 (2025-07-20)：更新 Zeabur 部署指南，新增 Extension 部署方式說明
-- 0.1.0 (2025-07-20)：初始化專案
 - 2.3.3 (2025-07-14)：修正 CORS 導致的 CSS 載入問題
   - 🔧 調整中間件順序，將靜態文件服務移至 CORS 之前
   - 🌐 為靜態文件（CSS、JS）設置專用的 CORS 頭
@@ -416,40 +413,57 @@ TznThou
 
 ```text
 AI心情樹洞/
-├── index.html                # 主頁，前端UI與結構
-├── README.md                 # 專案說明與版本紀錄
-├── USER_MANUAL.md            # 使用者操作手冊
-├── Tailwind 設計風格指南.md  # UI設計規範與色彩指南
-├── 程式碼行數最佳實踐規則.md  # 程式碼結構與行數規範
+├── index.html                    # 主頁面，前端UI與結構
+├── server.js                     # Node.js 後端代理服務器
+├── package.json                  # Node.js 專案配置
+├── package-lock.json             # 依賴版本鎖定檔案
+├── .env                          # 環境變數配置（敏感資料，不提交）
+├── env.example                   # 環境變數範例檔案
+├── .gitignore                    # Git 忽略檔案配置
+├── README.md                     # 專案說明與版本紀錄
+├── USER_MANUAL.md                # 使用者操作手冊
+├── zeabur-deployment-guide.md    # Zeabur 部署指南
+├── Tailwind 設計風格指南.md      # UI設計規範與色彩指南
+├── 程式碼行數最佳實踐規則.md     # 程式碼結構與行數規範
+├── .cursorrules                  # AI協作規則
+├── style.css                     # 自定義CSS樣式
 ├── js/
-│   ├── main.js               # 應用主入口，初始化所有模組
+│   ├── main.js                   # 應用主入口，初始化所有模組
 │   └── modules/
-│       ├── config.js         # 靜態設定、AI回應模板、情緒關鍵字、API配置
-│       ├── state.js          # 全域狀態管理
-│       ├── storage.js        # 本地資料儲存與載入
-│       ├── ai.js             # 情感分析與AI回應邏輯整合
-│       ├── aiService.js      # AI API 通訊服務（DeepBricks API）
-│       ├── chart.js          # 心情趨勢圖表繪製
-│       ├── ui.js             # UI顯示、動畫、通知等
-│       ├── greeting.json      # 問候語資料庫（溫暖、激勵、幽默等）
-│       └── events.js         # 事件綁定與用戶互動邏輯
-├── .specstory/
-│   ├── .what-is-this.md      # 專案規格說明
-│   └── history/              # 專案歷史紀錄
-│       └── ...
-├── .cursorrules              # AI協作規則
+│       ├── config.js             # 靜態設定、AI回應模板、情緒關鍵字、API配置
+│       ├── state.js              # 全域狀態管理
+│       ├── storage.js            # 本地資料儲存與載入
+│       ├── ai.js                 # 情感分析與AI回應邏輯整合
+│       ├── aiService.js          # AI API 通訊服務（DeepBricks API）
+│       ├── chart.js              # 心情趨勢圖表繪製
+│       ├── ui.js                 # UI顯示、動畫、通知等
+│       ├── greeting.json         # 問候語資料庫（溫暖、激勵、幽默等）
+│       └── events.js             # 事件綁定與用戶互動邏輯
+├── .specstory/                   # 專案規格與歷史紀錄
+│   ├── .what-is-this.md          # 專案規格說明
+│   └── history/                  # 專案歷史紀錄
+├── .vscode/                      # VS Code 工作區配置
+├── .zeabur/                      # Zeabur 部署配置
+├── node_modules/                 # Node.js 依賴包（不提交）
+└── .git/                         # Git 版本控制（不提交）
 ```
 
 **說明：**
 - `index.html`：應用主頁，包含所有UI結構與模態框。
+- `server.js`：Node.js 後端代理服務器，處理 AI API 調用和安全驗證。
+- `package.json`：Node.js 專案配置，包含依賴和腳本。
 - `js/main.js`：應用啟動點，負責載入與初始化所有功能模組。
 - `js/modules/`：所有JavaScript功能模組，依職責拆分，易於維護與擴充。
 - `js/modules/aiService.js`：AI API 通訊服務，處理與 DeepBricks AI 的所有互動。
 - `js/modules/greeting.json`：所有問候語資料，方便擴充與多語系支援。
+- `style.css`：自定義CSS樣式，補充 Tailwind CSS。
 - `USER_MANUAL.md`：詳細操作說明，會動態載入到說明模態框。
+- `zeabur-deployment-guide.md`：Zeabur 平台部署詳細指南。
 - `Tailwind 設計風格指南.md`：UI設計與色彩規範。
 - `程式碼行數最佳實踐規則.md`：團隊程式碼結構與品質標準。
+- `.cursorrules`：AI協作規則，定義開發流程和代碼標準。
 - `.specstory/`：專案規格、歷史紀錄與AI協作相關文件。
+- `.env`：環境變數配置（包含 API 金鑰等敏感資料，不提交到版本控制）。
 
 ---
 
