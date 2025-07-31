@@ -154,4 +154,41 @@ html.dark .welcome-title {
 .ai-response {
     animation: fadeInUp 0.5s ease-out;
     background: linear-gradient(135deg, #eff6ff 0%, #f3e8ff 100%);
+}
+
+/* =========================
+   移動端模態框優化
+   - 確保在手機上可以正常滾動
+========================= */
+@media (max-width: 768px) {
+    /* 模態框容器優化 */
+    .fixed.inset-0 {
+        -webkit-overflow-scrolling: touch; /* iOS 滾動優化 */
+    }
+    
+    /* 模態框內容區域優化 */
+    .max-h-\[90vh\] {
+        max-height: 85vh; /* 在手機上稍微減少高度 */
+    }
+    
+    /* 確保按鈕在手機上容易點擊 */
+    button {
+        min-height: 44px; /* iOS 建議的最小觸控區域 */
+    }
+    
+    /* 模態框內文字大小優化 */
+    .prose {
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    
+    /* 免責聲明模態框特別優化 */
+    #disclaimerModal .prose {
+        font-size: 0.9rem;
+    }
+    
+    #disclaimerModal button {
+        font-size: 1rem;
+        padding: 12px 16px;
+    }
 } 
