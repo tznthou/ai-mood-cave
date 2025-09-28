@@ -50,10 +50,9 @@ app.use(helmet({
             ],
             scriptSrc: [
                 "'self'",
-                "'unsafe-inline'",
-                "'unsafe-eval'", // Tailwind 需要
                 "https://cdn.tailwindcss.com",
                 "https://cdn.jsdelivr.net"
+                // 移除 'unsafe-eval' 和 'unsafe-inline' 提升安全性
             ],
             fontSrc: [
                 "'self'",
@@ -107,10 +106,13 @@ app.use(limiter);
 
 // 健康檢查端點
 app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'healthy', 
+    const apiKeyConfigured = !!process.env.DEEPBRICKS_API_KEY;
+    res.json({
+        status: 'healthy',
         timestamp: new Date().toISOString(),
-        version: '1.0.0'
+        version: '1.0.0',
+        apiKeyConfigured: apiKeyConfigured,
+        environment: process.env.NODE_ENV || 'development'
     });
 });
 
@@ -161,9 +163,11 @@ app.post('/api/ai/chat', aiLimiter, async (req, res) => {
         // 檢查 API 金鑰
         const apiKey = process.env.DEEPBRICKS_API_KEY;
         if (!apiKey) {
-            console.error('API key not configured');
+            console.error('[ERROR] DEEPBRICKS_API_KEY not configured in environment variables');
+            console.error('[DEBUG] Available env vars:', Object.keys(process.env).filter(key => key.includes('API')));
             return res.status(500).json({
-                error: 'Server configuration error'
+                error: 'Server configuration error: API key not found',
+                details: process.env.NODE_ENV === 'development' ? 'DEEPBRICKS_API_KEY environment variable is missing' : undefined
             });
         }
 
@@ -197,8 +201,27 @@ app.post('/api/ai/chat', aiLimiter, async (req, res) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`API Error: ${response.status} - ${errorText}`);
-            throw new Error(`API request failed: ${response.status}`);
+            console.error(`[ERROR] DeepBricks API Error: ${response.status} - ${errorText}`);
+
+            // 嘗試解析錯誤詳情
+            let errorDetails = '';
+            try {
+                const errorData = JSON.parse(errorText);
+                errorDetails = errorData.error?.message || errorData.message || errorText;
+            } catch {
+                errorDetails = errorText;
+            }
+
+            // 根據不同的錯誤狀態碼提供具體錯誤資訊
+            if (response.status === 401) {
+                throw new Error('API key authentication failed - please check your DeepBricks API key');
+            } else if (response.status === 429) {
+                throw new Error('API rate limit exceeded - please try again later');
+            } else if (response.status === 400) {
+                throw new Error(`Invalid request to API: ${errorDetails}`);
+            } else {
+                throw new Error(`API request failed (${response.status}): ${errorDetails}`);
+            }
         }
 
         const data = await response.json();
@@ -229,7 +252,8 @@ function generateSystemPrompt(style) {
         warm: `你是一個溫暖、關懷的心理支持助手。請用溫柔、理解的語氣回應用戶，就像一個關心的朋友。回應要：
 - 表達同理心和理解
 - 提供情感支持和安慰
-- 使用溫暖的語言和適當的表情符號
+- 使用溫暖、親切的語言
+- 適度使用溫暖的emoji（如💙❤️😊🤗），但每段回應最多2-3個
 - 回應長度控制在100-200字
 - 避免過於專業的術語`,
 
@@ -238,12 +262,14 @@ function generateSystemPrompt(style) {
 - 提供建設性的分析和建議
 - 保持專業但不冷漠的語調
 - 回應長度控制在150-250字
-- 適當時建議尋求專業幫助`,
+- 適當時建議尋求專業幫助
+- 維持專業形象，不使用emoji`,
 
         friend: `你是用戶的好朋友，用輕鬆、親近的方式與用戶對話。回應要：
 - 使用朋友間的自然語調
 - 適當使用口語化表達
 - 表現出關心和支持
+- 自然地使用常見emoji來表達情感（如😊😂🤔💪😇），但要適度
 - 回應長度控制在80-150字
 - 可以分享相似經歷或感受`,
 
@@ -251,6 +277,7 @@ function generateSystemPrompt(style) {
 - 提供深刻的洞察和啟發
 - 引導用戶自我反思
 - 提供建設性的建議和方向
+- 在鼓勵時適度使用正面emoji（如💪🌟✨🎯），但要謹慎使用
 - 回應長度控制在120-200字
 - 鼓勵積極的行動和改變`,
 
@@ -258,6 +285,7 @@ function generateSystemPrompt(style) {
 - 使用平和、寧靜的語調
 - 提供冥想或正念練習建議
 - 引導用戶關注當下
+- 適度使用平靜相關emoji（如🌸🙏✨🌿🕯️），營造寧靜氛圍
 - 回應長度控制在100-180字
 - 包含具體的放鬆技巧`
     };
@@ -284,12 +312,23 @@ app.use((req, res) => {
 
 // 啟動服務器
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 AI心情樹洞後端服務器運行在 http://0.0.0.0:${PORT}`);
-    console.log(`📱 前端地址：http://localhost:${PORT}`);
-    console.log(`🔒 API安全代理已啟用`);
-    console.log(`⏰ 啟動時間：${new Date().toISOString()}`);
-    console.log(`🌐 環境：${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔑 API Key 已配置：${process.env.DEEPBRICKS_API_KEY ? '✅' : '❌'}`);
+    console.log(` AI心情樹洞後端服務器運行在 http://0.0.0.0:${PORT}`);
+    console.log(` 前端地址：http://localhost:${PORT}`);
+    console.log(` API安全代理已啟用`);
+    console.log(`[啟動時間] ${new Date().toISOString()}`);
+    console.log(` 環境：${process.env.NODE_ENV || 'development'}`);
+
+    // API 配置狀態 (開發和生產都顯示)
+    const apiKeyConfigured = !!process.env.DEEPBRICKS_API_KEY;
+    console.log(` API Key 已配置：${apiKeyConfigured ? '[OK]' : '[ERROR]'}`);
+
+    // Zeabur 部署診斷資訊 (生產環境)
+    if (process.env.NODE_ENV === 'production') {
+        console.log(`[生產環境診斷]`);
+        console.log(`   - Port: ${PORT} (${process.env.PORT ? '來自環境變數' : '使用預設值 8080'})`);
+        console.log(`   - Model: ${process.env.AI_MODEL || 'claude-sonnet-4'}`);
+        console.log(`   - 伺服器啟動完成 [OK]`);
+    }
 });
 
 // 優雅關閉

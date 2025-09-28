@@ -16,9 +16,9 @@ import { AI_CONFIG } from './config.js';
  */
 export async function callDeepBricksAI(userMessage, style = 'warm') {
     try {
-        console.log('🤖 開始調用後端 AI API 代理...');
-        console.log('📝 用戶訊息長度:', userMessage.length, '字符');
-        console.log('🎨 回應風格:', style);
+        console.log(' 開始調用後端 AI API 代理...');
+        console.log(' 用戶訊息長度:', userMessage.length, '字符');
+        console.log(' 回應風格:', style);
 
         const requestBody = {
             messages: [
@@ -27,22 +27,30 @@ export async function callDeepBricksAI(userMessage, style = 'warm') {
             style: style
         };
 
-        console.log('📤 發送請求到後端代理...');
-        console.log('🔗 API URL:', AI_CONFIG.API_URL);
+        console.log(' 發送請求到後端代理...');
+        console.log(' API URL:', AI_CONFIG.API_URL);
+
+        // 建立 AbortController 用於超時控制
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超時
 
         const response = await fetch(AI_CONFIG.API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(requestBody),
+            signal: controller.signal
         });
 
-        console.log('📥 收到後端響應:', response.status, response.statusText);
+        // 清除超時計時器
+        clearTimeout(timeoutId);
+
+        console.log(' 收到後端響應:', response.status, response.statusText);
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('❌ 後端錯誤響應:', errorData);
+            console.error(' 後端錯誤響應:', errorData);
             
             // 檢查是否是速率限制錯誤
             if (response.status === 429) {
@@ -53,23 +61,41 @@ export async function callDeepBricksAI(userMessage, style = 'warm') {
         }
 
         const data = await response.json();
-        console.log('✅ 後端響應成功');
-        console.log('📊 響應數據長度:', data.response ? data.response.length : 0, '字符');
+        console.log(' 後端響應成功');
+        console.log(' 響應數據長度:', data.response ? data.response.length : 0, '字符');
         
         if (data.success && data.response) {
-            console.log('🎯 AI 回應已接收');
+            console.log(' AI 回應已接收');
             return data.response;
         } else if (data.fallback) {
             // 後端指示應該使用備用回應
-            console.log('🔄 後端建議使用備用回應');
+            console.log(' 後端建議使用備用回應');
             throw new Error('AI service unavailable, using fallback');
         } else {
-            console.error('❌ 後端響應格式異常');
+            console.error(' 後端響應格式異常');
             throw new Error('Invalid backend response format');
         }
     } catch (error) {
-        console.error('❌ 後端 AI API 調用失敗:', error.message);
-        throw error;
+        // 處理不同類型的錯誤，提供更友善的錯誤訊息
+        if (error.name === 'AbortError') {
+            console.error('AI API 請求超時 (10秒)');
+            throw new Error('請求超時，請檢查網路連線後重試');
+        } else if (error.message?.includes('429')) {
+            console.error('API 請求過於頻繁');
+            throw new Error('請求過於頻繁，請稍後再試');
+        } else if (error.message?.includes('401')) {
+            console.error('API 認證失敗');
+            throw new Error('服務認證失敗，請聯繫管理員');
+        } else if (error.message?.includes('500')) {
+            console.error('伺服器內部錯誤');
+            throw new Error('伺服器內部錯誤，請稍後再試');
+        } else if (error.message?.includes('fetch')) {
+            console.error('網路連線錯誤');
+            throw new Error('無法連接到服務器，請檢查網路連線');
+        } else {
+            console.error('後端 AI API 調用失敗:', error.message);
+            throw new Error(`服務暫時無法使用：${error.message}`);
+        }
     }
 }
 
@@ -83,10 +109,10 @@ export async function testAIConnection() {
             "你好，請回應一個簡單的問候。",
             "warm"
         );
-        console.log('🔗 後端 AI 連線測試成功:', testResponse);
+        console.log(' 後端 AI 連線測試成功:', testResponse);
         return true;
     } catch (error) {
-        console.error('❌ 後端 AI 連線測試失敗:', error);
+        console.error(' 後端 AI 連線測試失敗:', error);
         return false;
     }
 }

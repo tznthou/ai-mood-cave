@@ -245,6 +245,7 @@ export function showSettingsModal() {
     document.getElementById('localOnly').checked = settings.localOnly;
     document.getElementById('dailyReminder').checked = settings.dailyReminder;
     document.getElementById('darkModeToggle').checked = settings.darkMode;
+    document.getElementById('dataRetentionDays').value = settings.dataRetentionDays || 1;
     
     showModal('settingsModal');
 }
@@ -276,6 +277,7 @@ export function applySettings() {
     document.getElementById('localOnly').checked = settings.localOnly;
     document.getElementById('dailyReminder').checked = settings.dailyReminder;
     document.getElementById('darkModeToggle').checked = settings.darkMode;
+    document.getElementById('dataRetentionDays').value = settings.dataRetentionDays || 1;
 
     toggleDarkMode(settings.darkMode);
 }

@@ -21,14 +21,20 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Favicon 設定 -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="favicon.ico">
+
     <link rel="stylesheet" href="style.css">
     <style>
         /* 備用樣式，確保基本外觀 */
         .gradient-bg {
-            background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, #f59e0b 0%, #fb923c 100%);
         }
         .main-bg {
-            background: linear-gradient(135deg, #fafaf9 0%, #dbeafe 100%);
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
         }
         .card-shadow {
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
@@ -48,10 +54,10 @@
         }
         /* 深色模式備用樣式 */
         html.dark .main-bg {
-            background: linear-gradient(135deg, #1c1917 0%, #1e1b4b 100%);
+            background: linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #7c2d12 100%);
         }
         html.dark .gradient-bg {
-            background: linear-gradient(135deg, #0369a1 0%, #6d28d9 100%);
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
         }
         html.dark .card-shadow {
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
@@ -101,14 +107,14 @@
                 <div class="mb-6">
                     <p class="text-stone-600 dark:text-stone-300 mb-3 font-medium">現在的心情：</p>
                     <div class="flex flex-wrap gap-3" id="moodTags">
-                        <button class="mood-tag px-4 py-3 bg-amber-100 border-2 border-amber-200 text-amber-800 dark:bg-amber-900/50 dark:border-amber-700/50 dark:text-amber-200 rounded-full text-sm font-medium" data-mood="開心">😊 開心</button>
-                        <button class="mood-tag px-4 py-3 bg-indigo-100 border-2 border-indigo-200 text-indigo-800 dark:bg-indigo-900/50 dark:border-indigo-700/50 dark:text-indigo-200 rounded-full text-sm font-medium" data-mood="難過">😢 難過</button>
-                        <button class="mood-tag px-4 py-3 bg-orange-100 border-2 border-orange-200 text-orange-800 dark:bg-orange-900/50 dark:border-orange-700/50 dark:text-orange-200 rounded-full text-sm font-medium" data-mood="焦慮">😰 焦慮</button>
-                        <button class="mood-tag px-4 py-3 bg-red-100 border-2 border-red-200 text-red-800 dark:bg-red-900/50 dark:border-red-700/50 dark:text-red-200 rounded-full text-sm font-medium" data-mood="憤怒">😡 憤怒</button>
-                        <button class="mood-tag px-4 py-3 bg-purple-100 border-2 border-purple-200 text-purple-800 dark:bg-purple-900/50 dark:border-purple-700/50 dark:text-purple-200 rounded-full text-sm font-medium" data-mood="困惑">🤔 困惑</button>
-                        <button class="mood-tag px-4 py-3 bg-stone-100 border-2 border-stone-200 text-stone-800 dark:bg-stone-700/50 dark:border-stone-600/50 dark:text-stone-200 rounded-full text-sm font-medium" data-mood="疲憊">😴 疲憊</button>
-                        <button class="mood-tag px-4 py-3 bg-emerald-100 border-2 border-emerald-200 text-emerald-800 dark:bg-emerald-900/50 dark:border-emerald-700/50 dark:text-emerald-200 rounded-full text-sm font-medium" data-mood="興奮">🤗 興奮</button>
-                        <button class="mood-tag px-4 py-3 bg-sky-100 border-2 border-sky-200 text-sky-800 dark:bg-sky-900/50 dark:border-sky-700/50 dark:text-sky-200 rounded-full text-sm font-medium" data-mood="平靜">😌 平靜</button>
+                        <button class="mood-tag px-4 py-3 bg-amber-100 border-2 border-amber-200 text-amber-800 dark:bg-amber-900/50 dark:border-amber-700/50 dark:text-amber-200 rounded-full text-sm font-medium" data-mood="開心"><i class="fas fa-smile mr-2"></i>開心</button>
+                        <button class="mood-tag px-4 py-3 bg-indigo-100 border-2 border-indigo-200 text-indigo-800 dark:bg-indigo-900/50 dark:border-indigo-700/50 dark:text-indigo-200 rounded-full text-sm font-medium" data-mood="難過"><i class="fas fa-sad-tear mr-2"></i>難過</button>
+                        <button class="mood-tag px-4 py-3 bg-orange-100 border-2 border-orange-200 text-orange-800 dark:bg-orange-900/50 dark:border-orange-700/50 dark:text-orange-200 rounded-full text-sm font-medium" data-mood="焦慮"><i class="fas fa-frown-open mr-2"></i>焦慮</button>
+                        <button class="mood-tag px-4 py-3 bg-red-100 border-2 border-red-200 text-red-800 dark:bg-red-900/50 dark:border-red-700/50 dark:text-red-200 rounded-full text-sm font-medium" data-mood="憤怒"><i class="fas fa-angry mr-2"></i>憤怒</button>
+                        <button class="mood-tag px-4 py-3 bg-purple-100 border-2 border-purple-200 text-purple-800 dark:bg-purple-900/50 dark:border-purple-700/50 dark:text-purple-200 rounded-full text-sm font-medium" data-mood="困惑"><i class="fas fa-question mr-2"></i>困惑</button>
+                        <button class="mood-tag px-4 py-3 bg-stone-100 border-2 border-stone-200 text-stone-800 dark:bg-stone-700/50 dark:border-stone-600/50 dark:text-stone-200 rounded-full text-sm font-medium" data-mood="疲憊"><i class="fas fa-bed mr-2"></i>疲憊</button>
+                        <button class="mood-tag px-4 py-3 bg-emerald-100 border-2 border-emerald-200 text-emerald-800 dark:bg-emerald-900/50 dark:border-emerald-700/50 dark:text-emerald-200 rounded-full text-sm font-medium" data-mood="興奮"><i class="fas fa-laugh-beam mr-2"></i>興奮</button>
+                        <button class="mood-tag px-4 py-3 bg-sky-100 border-2 border-sky-200 text-sky-800 dark:bg-sky-900/50 dark:border-sky-700/50 dark:text-sky-200 rounded-full text-sm font-medium" data-mood="平靜"><i class="fas fa-meh mr-2"></i>平靜</button>
                     </div>
                 </div>
 
@@ -134,11 +140,11 @@
                 <div class="mt-6 mb-6">
                     <p class="text-stone-600 dark:text-stone-300 mb-3 font-medium">選擇AI回應風格：</p>
                     <select id="responseStyle" class="w-full p-4 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-500/20 focus:border-blue-300 dark:focus:border-blue-500 bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-200">
-                        <option value="warm">🤗 溫暖陪伴型</option>
-                        <option value="professional">🧠 專業分析型</option>
-                        <option value="friend">👥 朋友聊天型</option>
-                        <option value="mentor">🎯 導師指導型</option>
-                        <option value="meditation">🧘‍♀️ 冥想靜心型</option>
+                        <option value="warm"><i class="fas fa-heart"></i> 溫暖陪伴型</option>
+                        <option value="professional"><i class="fas fa-brain"></i> 專業分析型</option>
+                        <option value="friend"><i class="fas fa-users"></i> 朋友聊天型</option>
+                        <option value="mentor"><i class="fas fa-bullseye"></i> 導師指導型</option>
+                        <option value="meditation"><i class="fas fa-leaf"></i> 冥想靜心型</option>
                     </select>
                 </div>
 
@@ -293,11 +299,24 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-stone-200 mb-2">隱私設定</label>
-                        <div class="space-y-2">
+                        <div class="space-y-3">
                             <label class="flex items-center">
                                 <input type="checkbox" id="autoDelete" checked class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span class="text-sm ml-2 text-stone-700 dark:text-stone-300">24小時後自動刪除記錄</span>
+                                <span class="text-sm ml-2 text-stone-700 dark:text-stone-300">自動刪除過期記錄</span>
                             </label>
+
+                            <!-- 數據保留期限設定 -->
+                            <div class="ml-6 space-y-2">
+                                <label class="block text-xs font-medium text-gray-600 dark:text-stone-400">數據保留期限</label>
+                                <select id="dataRetentionDays" class="text-sm px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                                    <option value="1">24小時（預設）</option>
+                                    <option value="7">一週（7天）</option>
+                                    <option value="30">一個月（30天）</option>
+                                    <option value="90">三個月（90天）</option>
+                                </select>
+                                <p class="text-xs text-gray-500 dark:text-stone-400">建議30天可獲得更好的心情分析效果</p>
+                            </div>
+
                             <label class="flex items-center">
                                 <input type="checkbox" id="localOnly" checked class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 <span class="text-sm ml-2 text-stone-700 dark:text-stone-300">僅本地存儲</span>

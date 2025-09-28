@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__ide__getDiagnostics",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(npm start)",
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__puppeteer__puppeteer_click",
+      "mcp__puppeteer__puppeteer_evaluate",
+      "mcp__puppeteer__puppeteer_fill",
+      "Bash(npm run dev:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(PORT=3002 npm run dev)",
+      "Read(//Users/tznthou/Documents/Practice/**)",
+      "Bash(PORT=3004 npm start)",
+      "Bash(python3:*)",
+      "Bash(curl -X POST http://localhost:3004/api/ai/chat )",
+      "mcp__puppeteer__puppeteer_select",
+      "Bash(git add:*)"
+    ],
+    "deny": []
+  }
+}

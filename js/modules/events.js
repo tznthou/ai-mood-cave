@@ -1,31 +1,60 @@
 import { state } from './state.js';
 import { saveMoodRecord, clearAllData, saveSettings } from './storage.js';
 import { analyzeEmotion, generateAIResponse } from './ai.js';
-import { 
+import { CONSTANTS } from './config.js';
+import {
     selectMoodTag, showHelpModal, showRecordsModal, showSettingsModal, hideModal,
     showDisclaimerModal, toggleDarkMode, showNotification, resetMoodSelection,
     displayAIResponse, displaySuggestions, showLoadingIndicator
 } from './ui.js';
 
 /**
+ * 安全的輸入驗證函數
+ * @param {string} text 待驗證的文字
+ * @returns {string} 清理後的文字
+ */
+function sanitizeInput(text) {
+    // 移除HTML標籤
+    const htmlStripped = text.replace(/<[^>]*>/g, '');
+
+    // 檢查是否包含可疑腳本
+    if (/<script|javascript:|data:|vbscript:|onload|onerror/i.test(text)) {
+        throw new Error('輸入內容包含不允許的字符');
+    }
+
+    // 過濾危險的特殊字符但保留基本標點
+    const cleaned = htmlStripped.replace(/[<>]/g, '');
+
+    return cleaned.trim();
+}
+
+/**
  * 處理心情提交
  */
 async function submitMood() {
     const moodInput = document.getElementById('moodInput');
-    const moodText = moodInput.value.trim();
-    
+    let moodText = moodInput.value.trim();
+
     // 輸入驗證
     if (!moodText) {
         showNotification('請輸入你的心情想法', 'warning');
         return;
     }
-    
+
+    // 安全驗證和清理
+    try {
+        moodText = sanitizeInput(moodText);
+    } catch (error) {
+        showNotification('輸入內容不符合安全要求，請重新輸入', 'warning');
+        return;
+    }
+
     // 長度限制 (防止過長輸入)
     if (moodText.length > 1000) {
         showNotification('輸入內容過長，請控制在1000字以內', 'warning');
         return;
     }
-    
+
     // 基本內容驗證 (確保包含中文字符或英文字母)
     if (!/[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaffa-zA-Z]/.test(moodText)) {
         showNotification('請輸入有意義的文字內容', 'warning');
@@ -136,7 +165,7 @@ export function bindEventListeners() {
     document.getElementById('iUnderstandDisclaimerBtn').addEventListener('click', () => {
         localStorage.setItem('hasVisited', 'true');
         hideModal('disclaimerModal');
-        showNotification('歡迎使用！很高興見到你 😊', 'info');
+        showNotification('歡迎使用！很高興見到你', 'info');
     });
 
     // 設定頁面
@@ -156,6 +185,20 @@ export function bindEventListeners() {
     document.getElementById('autoDelete').addEventListener('change', saveSettings);
     document.getElementById('localOnly').addEventListener('change', saveSettings);
     document.getElementById('dailyReminder').addEventListener('change', saveSettings);
+
+    // 數據保留期限變更時提供即時反饋
+    document.getElementById('dataRetentionDays').addEventListener('change', (e) => {
+        const retentionOptions = {
+            '1': '24小時',
+            '7': '一週',
+            '30': '一個月',
+            '90': '三個月'
+        };
+        const selectedValue = e.target.value;
+        const displayText = retentionOptions[selectedValue] || `${selectedValue}天`;
+        showNotification(`數據保留期限已設為 ${displayText}`, 'info');
+        saveSettings();
+    });
 
     // 回應評價
     document.addEventListener('click', (e) => {

@@ -11,33 +11,63 @@ export function getSettings() {
             autoDelete: true,
             localOnly: true,
             dailyReminder: false,
-            darkMode: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+            darkMode: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches,
+            dataRetentionDays: 1 // 預設24小時（1天）保持向下相容
         };
-        return stored ? { ...defaultSettings, ...JSON.parse(stored) } : defaultSettings;
+
+        if (!stored) return defaultSettings;
+
+        const parsedSettings = JSON.parse(stored);
+        // 驗證並修正 dataRetentionDays
+        if (parsedSettings.dataRetentionDays !== undefined) {
+            parsedSettings.dataRetentionDays = validateRetentionDays(parsedSettings.dataRetentionDays);
+        }
+
+        return { ...defaultSettings, ...parsedSettings };
     } catch (error) {
         console.error('載入設定時發生錯誤:', error);
         return {
             autoDelete: true,
             localOnly: true,
             dailyReminder: false,
-            darkMode: false
+            darkMode: false,
+            dataRetentionDays: 1 // 預設24小時（1天）
         };
     }
+}
+
+/**
+ * 驗證保留天數的有效性
+ * @param {any} value - 要驗證的值
+ * @returns {number} 有效的保留天數（1-365天）
+ */
+function validateRetentionDays(value) {
+    const days = parseInt(value);
+    return isNaN(days) ? 1 : Math.max(1, Math.min(365, days));
 }
 
 /**
  * 保存設定到 localStorage
  */
 export function saveSettings() {
+    const retentionSelect = document.getElementById('dataRetentionDays');
     const settings = {
         autoDelete: document.getElementById('autoDelete').checked,
         localOnly: document.getElementById('localOnly').checked,
         dailyReminder: document.getElementById('dailyReminder').checked,
-        darkMode: document.getElementById('darkModeToggle').checked
+        darkMode: document.getElementById('darkModeToggle').checked,
+        dataRetentionDays: retentionSelect ? validateRetentionDays(retentionSelect.value) : 1 // 預設1天
     };
-    
-    localStorage.setItem('appSettings', JSON.stringify(settings));
-    console.log('設定已保存:', settings);
+
+    try {
+        localStorage.setItem('appSettings', JSON.stringify(settings));
+        console.log('設定已保存:', settings);
+    } catch (error) {
+        console.error('保存設定時發生錯誤:', error);
+        if (error.name === 'QuotaExceededError') {
+            console.warn('localStorage 容量不足');
+        }
+    }
 }
 
 
@@ -82,34 +112,100 @@ export function saveMoodRecord(record) {
 }
 
 /**
- * 清理過期記錄 (24小時前)
+ * 檢查日期字串是否有效
+ * @param {any} dateString - 要檢查的日期字串
+ * @returns {boolean} 是否為有效日期
+ */
+function isValidDate(dateString) {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date) && dateString.toString().trim() !== '';
+}
+
+/**
+ * 清理過期記錄（根據用戶設定的保留天數）
  */
 export function cleanupExpiredRecords() {
+    const settings = getSettings();
+    const retentionDays = validateRetentionDays(settings.dataRetentionDays || 1); // 使用驗證函數
+
     const now = new Date();
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    
+    const cutoffTime = retentionDays * 24 * 60 * 60 * 1000;
+    const cutoffDate = new Date(now.getTime() - cutoffTime);
+
+    // 檢查 cutoffDate 是否有效
+    if (!isValidDate(cutoffDate.toISOString())) {
+        console.error('清理記錄時日期計算錯誤');
+        return;
+    }
+
     const originalCount = state.moodRecords.length;
     state.moodRecords = state.moodRecords.filter(record => {
+        // 驗證記錄結構
+        if (!record || !record.timestamp) {
+            console.warn('發現無效記錄，已移除:', record);
+            return false;
+        }
+
         const recordDate = new Date(record.timestamp);
-        return recordDate > oneDayAgo;
+
+        // 檢查記錄日期有效性
+        if (!isValidDate(record.timestamp)) {
+            console.warn('發現無效時間戳記錄，已移除:', record.timestamp);
+            return false;
+        }
+
+        return recordDate > cutoffDate;
     });
-    
+
     if (state.moodRecords.length < originalCount) {
-        localStorage.setItem('moodRecords', JSON.stringify(state.moodRecords));
-        console.log(`已清理 ${originalCount - state.moodRecords.length} 條過期記錄。`);
+        try {
+            localStorage.setItem('moodRecords', JSON.stringify(state.moodRecords));
+            console.log(`已清理 ${originalCount - state.moodRecords.length} 條過期記錄（保留 ${retentionDays} 天）。`);
+        } catch (error) {
+            console.error('清理記錄時發生錯誤:', error);
+            if (error.name === 'QuotaExceededError') {
+                console.warn('localStorage 容量不足，嘗試清理更多記錄');
+                // 如果容量不足，保留最近的50條記錄
+                state.moodRecords = state.moodRecords.slice(0, 50);
+                try {
+                    localStorage.setItem('moodRecords', JSON.stringify(state.moodRecords));
+                } catch (secondError) {
+                    console.error('緊急清理也失敗:', secondError);
+                }
+            }
+        }
     }
 }
+
+// 存儲清理間隔ID，避免記憶體洩漏
+let cleanupInterval = null;
 
 /**
  * 啟動自動清理任務
  */
 export function startAutoCleanup() {
+    // 清除之前的間隔（如果存在）
+    if (cleanupInterval) {
+        clearInterval(cleanupInterval);
+    }
+
     // 每小時檢查一次過期記錄
-    setInterval(() => {
+    cleanupInterval = setInterval(() => {
         if (getSettings().autoDelete) {
             cleanupExpiredRecords();
         }
     }, 60 * 60 * 1000);
+}
+
+/**
+ * 停止自動清理機制
+ */
+export function stopAutoCleanup() {
+    if (cleanupInterval) {
+        clearInterval(cleanupInterval);
+        cleanupInterval = null;
+    }
 }
 
 /**
